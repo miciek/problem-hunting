@@ -1,7 +1,7 @@
 micio's problem-hunting
 =======================
 
-This is a Java project that is used by me in different algorithmic contests. It has solutions to different problem from:
+This is a Java project that is used by me in different algorithmic contests. It has solutions to problems from:
 
 - http://uva.onlinejudge.org/
 - https://www.facebook.com/hackercup
