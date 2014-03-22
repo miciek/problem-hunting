@@ -79,7 +79,7 @@ class Main {
             while (N-- > 0) {
                 m.add(in.nextInt());
             }
-            System.out.println(m.getMinSwaps() % 2);
+            System.out.println(m.whoWins());
             N = in.nextInt();
         }
         in.close();
