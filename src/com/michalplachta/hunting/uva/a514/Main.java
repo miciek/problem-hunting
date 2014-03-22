@@ -64,6 +64,7 @@ class Main {
             }
 
         }
+        System.out.println();
         in.close();
     }
 }
