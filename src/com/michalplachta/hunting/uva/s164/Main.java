@@ -125,11 +125,7 @@ class Main {
         public byte getScoreSource(int i, int j) {
             return dp_backtrack[i + 1][j + 1];
         }
-
-        public int getScore(int i, int j) {
-            return dp[i + 1][j + 1];
-        }
-        
+       
         private int calculateScoreFor(int i, int j) {
             if (i == 0 && j == 0) {
                 dp_backtrack[i][j] = NONE;
