@@ -4,6 +4,14 @@
 
 using namespace std;
 
+/**
+ * UVA 146 - ID Codes solution
+ * 
+ * http://uva.onlinejudge.org/external/1/146.html
+ * 
+ * @category ad-hoc, permutations
+ * @author micio
+ */
 int main() {
     char* input = new char[51];
     while(true) {
