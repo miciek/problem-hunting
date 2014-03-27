@@ -1,8 +1,10 @@
 package com.michalplachta.hunting.uva;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 /**
  * UVA 11340 (Newspaper) problem solution.
@@ -14,56 +16,57 @@ import java.util.Scanner;
  */
 public class Newspaper {
     public static class Solution {
-        private final Map<Character, Integer> prices;
+        private final int[] prices;
 
-        public Solution(Map<Character, Integer> prices) {
+        public Solution(int[] prices) {
             this.prices = prices;
         }
 
         public int getPriceForLine(String line) {
             int sum = 0;
             for (int i = 0; i < line.length(); i++) {
-                Character c = line.charAt(i);
-                if (prices.containsKey(c)) {
-                    sum += prices.get(c);
-                }
+                char c = line.charAt(i);
+                sum += prices[c];
             }
             return sum;
         }
     }
 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
+    public static void main(String[] args) throws NumberFormatException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        int n = in.nextInt();
+        int n = Integer.parseInt(br.readLine());
         while (n-- > 0) {
-            int k = in.nextInt();
-            in.nextLine();
+            int k = Integer.parseInt(br.readLine());
 
-            Hashtable<Character, Integer> prices = new Hashtable<Character, Integer>(k);
+            int[] prices = new int[100000];
             while (k-- > 0) {
-                String[] price = in.nextLine().trim().split(" ");
+                String[] price = br.readLine().split(" ");
                 char c = price[0].charAt(0);
                 int p = Integer.parseInt(price[1]);
-                prices.put(c, p);
+                prices[c] = p;
             }
 
             Solution s = new Solution(prices);
 
             long sum = 0;
-            int m = in.nextInt();
-            in.nextLine();
+            int m = Integer.parseInt(br.readLine());
             while (m-- > 0) {
-                sum += s.getPriceForLine(in.nextLine());
+                sum += s.getPriceForLine(br.readLine());
             }
 
-            printResult(sum);
+            bw.write(Long.toString(sum / 100));
+            long r = sum % 100;
+            if (r < 10) {
+                bw.write(".0");
+            } else {
+                bw.write(".");
+            }
+            bw.write(Long.toString(r));
+            bw.write("$\n");
         }
 
-        in.close();
-    }
-
-    private static void printResult(long sum) {
-        System.out.format("%d.%02d$\n", sum / 100, sum % 100);
+        bw.flush();
     }
 }

@@ -53,7 +53,11 @@ public class NewspaperTest {
     }
 
     private long getSum(Map<Character, Integer> prices, String[] lines) {
-        Newspaper.Solution s = new Newspaper.Solution(prices);
+        int[] prices_opt = new int[1000];
+        for (Character c : prices.keySet()) {
+            prices_opt[c] = prices.get(c);
+        }
+        Newspaper.Solution s = new Newspaper.Solution(prices_opt);
         long sum = 0;
         for (String line : lines) {
             sum += s.getPriceForLine(line);
