@@ -15,7 +15,9 @@ public class MainTest {
         m.addRow("EEEEE");
         assertEquals("1,2 4,2", m.find("DISC").toString());
         assertEquals("2,1 2,4", m.find("DISK").toString());
-        assertEquals("Not found", m.find("DISP").toString());
+        assertEquals(null, m.find("DISP"));
+        assertEquals("2,3 2,3", m.find("S").toString());
+        assertEquals("2,3 2,5", m.find("SKE").toString());
     }
 
     @Test
@@ -35,10 +37,19 @@ public class MainTest {
         assertEquals("2,2 1,2", m.find("DB").toString());
         assertEquals("2,1 1,2", m.find("CB").toString());
         assertEquals("1,2 2,1", m.find("BC").toString());
-        assertEquals("Not found", m.find("AA").toString());
-        assertEquals("Not found", m.find("BB").toString());
-        assertEquals("Not found", m.find("CC").toString());
-        assertEquals("Not found", m.find("DD").toString());
-    }
-
+        assertEquals(null, m.find("AA"));
+        assertEquals(null, m.find("BB"));
+        assertEquals(null, m.find("CC"));
+        assertEquals(null, m.find("DD"));
+    }  
+    
+    @Test
+    public void simple1element() {
+        Main m = new Main(1);
+        m.addRow("A");
+        assertEquals("1,1 1,1", m.find("A").toString());        
+        assertEquals(null, m.find("B"));
+        assertEquals(null, m.find("AB"));
+        assertEquals(null, m.find("AA"));
+    }  
 }
