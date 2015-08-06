@@ -3,3 +3,5 @@
 .classpath
 *.out
 .idea
+.iml
+npm-debug.log
