@@ -3,5 +3,7 @@
 .classpath
 *.out
 .idea
-.iml
+*.iml
+target
 npm-debug.log
+
