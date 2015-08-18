@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define D(x) x
@@ -18,6 +18,9 @@ struct Car {
   int index;
   int x;
   int width;
+  int target_x;
+  int position;
+  int target_position;
 };
 
 const int MAX_CARS = 50005;
@@ -31,7 +34,7 @@ void print_cars(Car cars[], int qty) {
   printf("%d cars: ", qty);
   for(int i = 0; i < qty; i++)
   {
-    printf("Car %d: {%d, %d, %d}, ", i, cars[i].index, cars[i].x, cars[i].width);
+    printf("{%d -> %d, %d -> %d, %d}, ", cars[i].position, cars[i].target_position, cars[i].x, cars[i].target_x, cars[i].width);
   }
   printf("\n");
 }
@@ -40,7 +43,7 @@ void read_cars_to(Car cars[], int qty) {
   int x1, y1, x2, y2;
   for(int i = 0; i < qty; i++) {
     scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
-    cars[i] = (Car){i, min(x1, x2), fabs(y2 - y1)};
+    cars[i] = (Car){i, min(x1, x2), fabs(y2 - y1), 0, 0, 0};
   }
 }
 
@@ -53,13 +56,21 @@ void sort_cars(Car cars[], int qty, bool (*cmp)(const Car &, const Car &)) {
   sort(cars, cars+qty, cmp);
 }
 
-bool should_c1_go_before_c2(const Car &c1, const Car &c2) {
-  int i = 0;
-  while(true) {
-    if(target[i].index == c1.index) return true;
-    if(target[i].index == c2.index) return false;
-    i++;
+void fill_position_and_target_position(int qty) {
+  sort_cars(target, qty, cmp_car_by_x);
+  for(int i = 0; i < qty; i++) {
+    init[target[i].index].target_position = i;
+    init[target[i].index].target_x = target[i].x;
   }
+
+  sort_cars(init, qty, cmp_car_by_x);
+  for(int i = 0; i < qty; i++) {
+    init[i].position = i;
+  }
+}
+
+bool should_c1_go_before_c2(const Car &c1, const Car &c2) {
+  return c1.target_position < c2.target_position;
 }
 
 bool sort_init_and_check_inversions(const int start_inc, const int end_exc, const int max_inversion_width) {
@@ -77,19 +88,22 @@ bool sort_init_and_check_inversions(const int start_inc, const int end_exc, cons
     const int to_be_merged = end_exc - start_inc;
     int currently_merging = 0;
     int width_of_the_biggest_already_merged = 0;
+    D(printf("starting merge [%d, %d), left = %d, right = %d\n", start_inc, end_exc, left, right);)
     while(currently_merging < to_be_merged) {
-      D(printf("merging %d (left: %d, right: %d)\n", currently_merging, left, right);)
-      if(left == left_end_exc || should_c1_go_before_c2(init[right], init[left])) {
+      D(printf("merging %d: ", currently_merging);)
+      if(left == left_end_exc || (right != right_end_exc && should_c1_go_before_c2(init[right], init[left]))) {
         temp[left_start_inc + currently_merging] = init[right];
 
         if(init[right].width > width_of_the_biggest_already_merged) {
           width_of_the_biggest_already_merged = init[right].width;
         }
         right++;
+        D(printf("chose right: %d\n", right);)
       } else { // this is the only possible invalid inversion, so we need to check it
         if(width_of_the_biggest_already_merged + init[left].width > max_inversion_width) return false;
         temp[left_start_inc + currently_merging] = init[left];
         left++;
+        D(printf("chose left: %d\n", left);)
       }
       currently_merging++;
     }
@@ -109,8 +123,6 @@ bool sort_init_and_check_inversions(const int start_inc, const int end_exc, cons
   return false;
 }
 
-void unit_tests();
-
 int main() {
   int T;
   scanf("%d", &T);
@@ -126,24 +138,10 @@ int main() {
     D(print_cars(init, n);)
     D(print_cars(target, n);)
 
-    sort_cars(init, n, cmp_car_by_x);
-    sort_cars(target, n, cmp_car_by_x);
+    fill_position_and_target_position(n);
     bool result = sort_init_and_check_inversions(0, n, w);
     printf("%s\n", result ? "TAK" : "NIE");
   }
 
-  D(unit_tests();)
   return 0;
-}
-
-// UNIT TESTS FOR EACH PART OF THE ALGORITHM
-
-bool sorting_by_x() {
-  Car arr[] = {(Car){0, 2, 0}, (Car){0, 1, 0}, (Car){0, 0, 0}};
-  sort_cars(arr, 3, cmp_car_by_x);
-  return arr[0].x == 0 && arr[1].x == 1 && arr[2].x == 2;
-}
-
-void unit_tests() {
-  printf("sorting_by_x: %d\n", sorting_by_x());
 }
