@@ -1,8 +1,8 @@
 #include <cstdio>
-#include <cstring>
 #include <cmath>
 #include <cassert> 
-#define DEBUG
+#include <string>
+//#define DEBUG
 
 #ifdef DEBUG
 #define D(x); x
@@ -12,128 +12,86 @@
 
 using namespace std;
 
-struct Result {
-  long twos;
-  long threes;
-  long ones;
-};
-
-struct CompResult {
-  Result r1;
-  Result r2;
-};
-
 char result[1000000];
 
-long ones(Result r) {
-  return r.ones + 2*r.twos + 3*r.threes;
+string cache[10000002];
+
+long ones(string r) {
+  long res = 0;
+  for(string::iterator it = r.begin(); it != r.end(); ++it)
+    if(*it == '1') res++;
+  return res;
 }
 
-bool not_possible(Result r) {
-  return ones(r) == 0;
-}
-
-int app2buf(char *buffer, int where, const char *appendee) {
-  strcpy(result + where, appendee);
-  return where + strlen(appendee);
-}
-
-Result calcones(Result cur, long n) {
+string calcones(long n) {
+  if(n < 10000002 && cache[n] != "") {
+    return cache[n];
+  }
   if(n == 1) {
-    cur.ones++;
-    D(printf("GOT %ld, returning %ld/%ld/%ld\n", n, cur.threes, cur.twos, cur.ones););
-    return cur;
+    string res = "1";
+    cache[n] = res;
+    return res;
   } else if(n == 2) {
-    cur.twos++;
-    D(printf("GOT %ld, returning %ld/%ld/%ld\n", n, cur.threes, cur.twos, cur.ones););
-    return cur;
+    string res = "(1+1)";
+    cache[n] = res;
+    return res;
   } else if(n == 3) {
-    cur.threes++;
-    D(printf("GOT %ld, returning %ld/%ld/%ld\n", n, cur.threes, cur.twos, cur.ones););
-    return cur;
+    string res = "(1+1+1)";
+    cache[n] = res;
+    return res;
   } else {
-    long threes = n/3;
-    long threes_remainder = n%3;
-    Result with_threes = cur;
+    long threes = n / 3;
+    long threes_remainder = n % 3;
+    string threes_using_ones = calcones(threes);
+    string three_based_result = calcones(3);
     if(threes > 1) {
-      with_threes = calcones(cur, threes);
+      three_based_result += "*" + threes_using_ones;
+    }     
+    if(threes_remainder > 0) {
+      three_based_result += "+" + calcones(threes_remainder);
     }
 
-    with_threes.threes += 1;
-    with_threes.ones *= threes;
-    with_threes.ones += threes_remainder;
-
-    long twos = n/2;
-    long twos_remainder = n%2;
-    Result with_twos = cur;
+    long twos = n / 2;
+    long twos_remainder = n % 2;
+    string twos_using_ones = calcones(twos);
+    string two_based_result = calcones(2);
     if(twos > 1) {
-      with_twos = calcones(cur, twos);
+      two_based_result += "*" + twos_using_ones;
+    }     
+    if(twos_remainder > 0) {
+      two_based_result += "+" + calcones(twos_remainder);
     }
 
-    with_twos.twos += 1;
-    with_twos.ones *= 2;
-    with_twos.ones += twos_remainder;
+    string result = two_based_result;
+    if(ones(three_based_result) < ones(two_based_result)) result = three_based_result;
 
-    if(ones(with_twos) <= ones(with_threes)) {
-      D(printf("GOT %ld, returning 2-based %ld/%ld/%ld\n", n, with_twos.threes, with_twos.twos, with_twos.ones););
-      return with_twos;
-    } else {
-      D(printf("GOT %ld, returning 3-based %ld/%ld/%ld\n", n, with_threes.threes, with_threes.twos, with_threes.ones););
-      return with_threes;
+    result = "(" + result + ")";
+    if(n < 10000002) {
+      cache[n] = result;
     }
-  }
-}
 
-int result2buf(Result r, char *b, int where) {
-  int w = where;
-  w = app2buf(b, w, "(");
-  for(int i = 0; i < r.threes; i++) {
-    w = app2buf(b, w, "(1+1+1)");
-    if(i < r.threes - 1) w = app2buf(b, w, "*");
+    return result;
   }
-  if(r.threes > 0 && r.twos > 0) w = app2buf(b, w, "*");
-  for(int i = 0; i < r.twos; i++) {
-    w = app2buf(b, w, "(1+1)");
-    if(i < r.twos - 1) w = app2buf(b, w, "*");
-  }
-  if((r.threes > 0 || r.twos > 0) && r.ones > 0) w = app2buf(b, w, "+");
-  if(r.ones > 3) {
-    Result rones = {0, 0, 0};
-    rones = calcones(rones, r.ones);
-    w = result2buf(rones, b, w);
-  } else {
-    for(int i = 0; i < r.ones; i++) {
-      w = app2buf(b, w, "1");
-      if(i < r.ones - 1) w = app2buf(b, w, "+");
-    }
-  }
-  w = app2buf(b, w, ")");
-  return w;
 }
 
 void fill_ones(long n) {
   D(printf("---\nFILLING ONES FOR %ld\n", n););
-  Result init = {0, 0, 0};
-  Result r = calcones(init, n);
-  D(printf("RAW: %ld/%ld/%ld\n", r.threes, r.twos, r.ones););
-  result2buf(r, result, 0);
+  string r = calcones(n);
   D(printf("%ld ones needed\n", ones(r)););
-  if(not_possible(r)) {
-    strcpy(result, "NIE");  
-  }
+  strcpy(result, r.c_str());
   D(printf("RESULT: %s\n", result););
 }
 
 #ifdef DEBUG
 int main() {
   fill_ones(1);
-  assert(strcmp("(1)", result) == 0);
+  assert(strcmp("1", result) == 0);
 
   fill_ones(2);
-  assert(strcmp("((1+1))", result) == 0);
+  assert(strcmp("(1+1)", result) == 0);
 
   fill_ones(3);
-  assert(strcmp("((1+1+1))", result) == 0);
+  assert(strcmp("(1+1+1)", result) == 0);
 
   fill_ones(4);
   assert(strcmp("((1+1)*(1+1))", result) == 0);
@@ -142,40 +100,40 @@ int main() {
   assert(strcmp("((1+1)*(1+1)+1)", result) == 0);
 
   fill_ones(6);
-  assert(strcmp("((1+1+1)*(1+1))", result) == 0);
+  assert(strcmp("((1+1)*(1+1+1))", result) == 0);
 
   fill_ones(7);
-  assert(strcmp("((1+1+1)*(1+1)+1)", result) == 0);
+  assert(strcmp("((1+1)*(1+1+1)+1)", result) == 0);
 
   fill_ones(8);
-  assert(strcmp("((1+1)*(1+1)*(1+1))", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*(1+1)))", result) == 0);
 
   fill_ones(9);
   assert(strcmp("((1+1+1)*(1+1+1))", result) == 0);
 
   fill_ones(10);
-  assert(strcmp("((1+1+1)*(1+1+1)+1)", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*(1+1)+1))", result) == 0);
 
   fill_ones(11);
-  assert(strcmp("((1+1+1)*(1+1+1)+1+1)", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*(1+1)+1)+1)", result) == 0);
 
   fill_ones(50);
-  assert(strcmp("((1+1+1)*(1+1)*(1+1)*(1+1)*(1+1)+1+1)", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*(1+1+1)))+1))", result) == 0);
 
   fill_ones(97);
-  assert(strcmp("((1+1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)+1)", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*(1+1+1)))))+1)", result) == 0);
 
   fill_ones(101);
-  assert(strcmp("((1+1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)+((1+1)*(1+1)+1))", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*(1+1+1)))+1))+1)", result) == 0);
 
   fill_ones(202);
-  assert(strcmp("((1+1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)+1+1+1+1+1)", result) == 0);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*(1+1+1)))+1))+1))", result) == 0);
 
-  //fill_ones(999999937);
-  //assert(strcmp("NIE", result) == 0);
+  fill_ones(999999937);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1+1)*((1+1+1)*((1+1+1)*((1+1+1)*((1+1)*((1+1)*((1+1+1)*((1+1)*((1+1+1)*((1+1+1)*((1+1)*((1+1)*((1+1)*((1+1+1)*((1+1)*((1+1)*((1+1+1)*(1+1+1)))+1))+1))+1)))+1)))+1))+(1+1)))))))))+1)", result) == 0);
 
-  //fill_ones(1073741824);
-  //assert(strcmp("(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)*(1+1)", result) == 0);
+  fill_ones(1073741824);
+  assert(strcmp("((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*((1+1)*(1+1))))))))))))))))))))))))))))))", result) == 0);
 
   return 0;
 }
