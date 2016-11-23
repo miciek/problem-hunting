@@ -7,3 +7,4 @@
 target
 npm-debug.log
 *.in
+*.swp
