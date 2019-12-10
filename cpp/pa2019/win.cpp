@@ -28,24 +28,18 @@ int main() {
   int k = 0;
   int minyear = 0;
 
-  while(scanf("%d %d", &n, &k) > 0) {
+  scanf("%d %d", &n, &k);
   scanf("%d", &minyear);
-
-  D(printf("---\nSOLVING n=%d k=%d\n", n, k););
 
   for(int i = 1; i < n; i++) {
     int next;
     for(int j = 0; j < i + 1; j++) {
       scanf("%d", &next);
-      if(next == 336) {
-        D(printf("\n336 @%d, %d, above: %d, current %d", i, j, winesAbove(i, j), minyear););
-      }
       if(winesAbove(i, j) < k && next < minyear)
         minyear = next;
     }
   }
 
   printf("%d\n", minyear);
-  }
   return 0;
 }
